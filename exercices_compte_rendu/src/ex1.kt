@@ -1,7 +1,3 @@
-import Emprunt
-import kotlin.Int
-import kotlin.collections.MutableList
-
 open class Personne(var nom : String,
                     var prenom : String,
                     var email : String){
@@ -20,16 +16,19 @@ class Utilisateur(nom: String,
 
     fun emprunterLivre(livre: Livre, dateEmprunt: String){
 
-        val user = Utilisateur(nom,prenom,email, idUtilisateur, emprunts )
-        val emprunt = Emprunt(user,livre,dateEmprunt,null)
-
-        emprunts.add(emprunt)
+        if (livre.disponiblePourEmprunt()){
+            val emprunt = Emprunt(this,livre,dateEmprunt,null)
+            emprunts.add(emprunt)
+            livre.nombreExemplaires -=1
+        }else{
+            println("Le livre  ${livre.titre} n'est pas disponible")
+        }
     }
 
     fun afficherEmprunts(){
-        println("voici les Emprunts de utilisateur $idUtilisateur")
+        println("voici les Emprunts de utilisateur $prenom")
         for(i in emprunts){
-            println(i)
+            i.afficherDetails()
         }
     }
 }
@@ -45,12 +44,13 @@ class Livre(var titre : String ,
 
     fun disponiblePourEmprunt(): Boolean{
 
-        if(nombreExemplaires < 1){
-            return true
-        }else{
-            return false
-        }
+        return nombreExemplaires >0
     }
+
+    fun mettreAJourStock(nouveauStock: Int) {
+        nombreExemplaires = nouveauStock
+    }
+
 }
 
 class Emprunt(var utilisateur : Utilisateur,
@@ -58,14 +58,18 @@ class Emprunt(var utilisateur : Utilisateur,
               var dateEmprunt : String,
               var dateRetour : String?){
 
-    fun afficherDetails(){
-        println("utilisateur: $utilisateur \n livre: $livre \n date: $dateEmprunt \n dateRetour: $dateRetour")
+    fun afficherDetails() {
+        println("Utilisateur : ${utilisateur.nom} ${utilisateur.prenom}")
+        println("Livre : ${livre.titre}")
+        println("Date emprunt : $dateEmprunt")
+        println("Date retour : $dateRetour")
     }
 
-    fun  retournerLivre(){
-        println("livre -> $livre est retourner a la date -> $dateRetour")
+    fun retournerLivre(dateRetour: String) {
+        this.dateRetour = dateRetour
+        livre.mettreAJourStock(livre.nombreExemplaires + 1)
 
-        livre.nombreExemplaires += 1
+        println("Livre ${livre.titre} retourné le $dateRetour")
     }
 }
 
@@ -81,13 +85,64 @@ abstract  class GestionBibliotheque{
     }
     fun afficherTousLesLivres(){
         for(i in livres){
-            println("titre: ${i.titre}\n auteur: ${i.auteur}\n isbn: ${i.isbn}\n nombreExemplaires:${i.nombreExemplaires}")
+            i.afficherDetails()
         }
     }
 }
 
+class Bibliotheque:GestionBibliotheque(){
+
+    fun rechercherLivreParTitre(titre: String): Livre? {
+        return livres.find { it.titre == titre }
+    }
+}
 
 
 fun main(){
+
+    val nouveauxlivres = listOf(
+        Livre("Le Petit Prince", "Antoine de Saint-Exupéry", "978-0156012195", 5),
+        Livre("L'Étranger", "Albert Camus", "978-2070360024", 3),
+        Livre("Les Misérables", "Victor Hugo","978-2070409228", 4),
+        Livre("1984", "George Orwell", "978-0451524935", 6),
+        Livre("L'Alchimiste", "Paulo Coelho", "978-0062315007", 2),
+    )
+
+    val nouveauxUtilisateurs = mutableListOf(
+        Utilisateur("Redouan", "Ouryach", "redouan@gmail.com", 1, mutableListOf()),
+        Utilisateur("Yassine", "Amrani", "yassine@gmail.com", 2, mutableListOf()),
+        Utilisateur("Sara", "Alaoui", "sara@gmail.com", 3, mutableListOf()),
+        Utilisateur("Imane", "Bennani", "imane@gmail.com", 4, mutableListOf()),
+        Utilisateur("Hamza", "Idrissi", "hamza@gmail.com", 5, mutableListOf())
+    )
+
+    val Bibliothequezohour = Bibliotheque()
+
+    for (i in nouveauxlivres){
+        Bibliothequezohour.ajouterLivre(i)
+    }
+    for (i in nouveauxUtilisateurs){
+        Bibliothequezohour.ajouterUtilisateur(i)
+    }
+
+    val Sara = nouveauxUtilisateurs[2]
+    Sara.emprunterLivre(Bibliothequezohour.livres[2],"02/10/2026")
+
+    val Hamza = nouveauxUtilisateurs[4]
+    Hamza.emprunterLivre(Bibliothequezohour.livres[0],"02/10/2026")
+
+
+    for(i in Bibliothequezohour.livres ){
+        println("livre: ${i.titre}")
+        i.afficherDetails()
+    }
+
+    for(i in Bibliothequezohour.utilisateurs){
+        println("iduser: ${i.idUtilisateur}")
+        i.afficherinfo()
+        i.afficherEmprunts()
+    }
+
+    Sara.emprunts[0].retournerLivre("01/01/2027")
 
 }
