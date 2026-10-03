@@ -125,11 +125,11 @@ fun main(){
         Bibliothequezohour.ajouterUtilisateur(i)
     }
 
-    val Sara = nouveauxUtilisateurs[2]
-    Sara.emprunterLivre(Bibliothequezohour.livres[2],"02/10/2026")
+    val user1 = nouveauxUtilisateurs[2]
+    user1.emprunterLivre(Bibliothequezohour.livres[2],"02/10/2026")
 
-    val Hamza = nouveauxUtilisateurs[4]
-    Hamza.emprunterLivre(Bibliothequezohour.livres[0],"02/10/2026")
+    val user2 = nouveauxUtilisateurs[4]
+    user2.emprunterLivre(Bibliothequezohour.livres[0],"02/10/2026")
 
 
     for(i in Bibliothequezohour.livres ){
@@ -143,6 +143,6 @@ fun main(){
         i.afficherEmprunts()
     }
 
-    Sara.emprunts[0].retournerLivre("01/01/2027")
+    user1.emprunts[0].retournerLivre("01/01/2027")
 
 }
